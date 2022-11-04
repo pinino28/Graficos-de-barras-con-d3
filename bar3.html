@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+
+
+<body>
+    <style>
+
+    </style>
+    
+    <head>
+        <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+        <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+    </head>
+    <title id="title"></title>
+<script>
+var req = new XMLHttpRequest();
+
+req.open("GET", "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json", true)
+req.send();
+req.onload = function(){
+/*{
+  "baseTemperature": 8.66,
+  "monthlyVariance": [
+    {
+      "year": 1753,
+      "month": 1,
+      "variance": -1.366
+    }
+  ]                          Formato del arreglo.
+}*/
+
+//medidas
+var w = 1000;
+var h = 500;
+var padding = 100;
+
+
+var json = JSON.parse(req.responseText);
+
+
+var yearData = json.monthlyVariance.map(x=> new Date(x.year, 0));
+
+
+var months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+var monthsPassToString = [];
+for(let i = 0; i < months.length; i++){
+monthsPassToString.push(months[i])
+}
+var monthsOfTheYear = ["January", "February", "March",
+                       "April", "May", "June",
+                       "July", "August", "September",
+                        "October", "November", "December"];
+
+                        var jsonData = json.monthlyVariance.map(x=>x.month)
+
+document.getElementById("texto").innerHTML =""
+
+var xMin = d3.min(yearData, (d) => d);
+var xMax = d3.max(yearData, (d) => d);
+
+
+var description = d3.select("description")
+
+var xScale = d3.scaleUtc()
+            .domain([xMin, xMax])
+            .range([padding, w-padding])
+
+var yScale = d3.scaleBand()
+            .domain(["January","February","March","April","May","June","July", "August","September","October","November","December"])
+            .range([h-padding, 0])
+
+            //SVG
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+
+            //axis
+            var xAxis = d3.axisBottom(xScale)
+            var yAxis = d3.axisLeft(yScale)
+  //12*263 an(i)os es 3156, asumo que faltan 3 meses... 
+ //3153 es el length de total de los meses
+
+    var rect = svg.append('g')
+    .selectAll('rect')
+    .data(jsonData)
+    .enter()
+    
+
+    
+            rect
+    .append('rect')
+    .style('fill', function (d) {
+      return "black";
+    })
+    .attr("class", "cell")
+    .attr('x', (d, i) => xScale(d.year))
+    .attr('y', (d,i)=> yScale(d.month))
+              // calcular tomando el numero del mes
+              //si el atributo supera 12 ahi correr el puesto en 1 en 
+              //el eje "Y" 
+    .attr('width', 2)
+    .attr('height', 30);
+               //tengo la opcion de hacer 11 mas de estos o de automatizarlo de alguna manera....
+
+
+                    //barra de abajo
+            svg.append("g")
+               .attr("id", "x-axis")
+               .attr("transform", "translate(0,"+ (h-padding) + ")")
+               .call(xAxis);
+        
+                    //barra izquierda
+            svg.append("g") 
+               .attr("id", "y-axis")
+               .attr("transform", "translate(100," + (0) + ")")
+               .call(yAxis)
+               
+}
+
+
+
+
+</script>
+
+<p id="texto"></p>
+
+<div id="description">
+<div class="cell"></div>
+</div>
+
+
+</body>
+
